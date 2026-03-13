@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Technical Program Summary</title>
+  <style>
+    :root{
+      --bg:#f4f5f7; --card:#fff; --text:#172b4d; --muted:#6b778c; --link:#0052cc;
+      --red:#ff5630; --yellow:#ffab00; --green:#36b37e; --purple:#6554c0; --neutral:#dfe1e6;
+      --shadow: 0 2px 6px rgba(0,0,0,.10);
+      --radius: 12px;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
+    .page{ padding:20px; }
+
+    .header{ display:flex; gap:16px; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; margin-bottom:14px;}
+    .title{ font-size:28px; margin:0 0 6px 0;}
+    .subtitle{ color:var(--muted); font-size:14px; margin:0; }
+
+    .controls{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+    .control{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
+    .control input{
+      width:320px; max-width:80vw; padding:8px 10px; border-radius:4px;
+      border:1px solid var(--neutral); background:#fff; color:var(--text);
+    }
+    .btn{
+      padding:9px 12px; border-radius:4px; border:1px solid var(--neutral);
+      background:#fff; cursor:pointer;
+    }
+
+    .error{
+      background:#fff; border-left:6px solid var(--red); padding:12px 14px;
+      border-radius:var(--radius); box-shadow:var(--shadow); margin:10px 0 14px 0;
+      white-space:pre-wrap;
+    }
+
+    .kpis{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin: 10px 0 20px 0; }
+    @media (max-width:1100px){ .kpis{ grid-template-columns:repeat(3,1fr);} }
+    @media (max-width:700px){ .kpis{ grid-template-columns:repeat(2,1fr);} }
+    .kpi{
+      background:#fff; border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);
+      border-left:8px solid var(--neutral);
+      cursor: pointer;
+      user-select: none;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      outline: none;
+    }
+    .kpi:hover{ transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+    .kpi:active{ transform: translateY(0px); }
+    .kpi[aria-pressed="true"]{ box-shadow: 0 0 0 3px rgba(0,82,204,.25), var(--shadow); }
+
+    .kpi-label{
+      font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:.4px; color:var(--muted);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .kpi-chip{
+      font-size:11px; font-weight:bold; padding:3px 8px; border-radius:999px; border:1px solid var(--neutral);
+      color: var(--muted);
+      background: rgba(223,225,230,.25);
+      white-space: nowrap;
+    }
+    .kpi[aria-pressed="true"] .kpi-chip{
+      color: var(--text);
+      background: rgba(0,82,204,.10);
+      border-color: rgba(0,82,204,.25);
+    }
+    .kpi-value{ font-size:26px; font-weight:bold; margin-top:6px; }
+
+    .kpi-red{ border-left-color:var(--red); }
+    .kpi-yellow{ border-left-color:var(--yellow); }
+    .kpi-green{ border-left-color:var(--green); }
+    .kpi-notset{ border-left-color:var(--purple); }
+
+    .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    @media (max-width:1100px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:700px){ .grid{ grid-template-columns:1fr;} }
+
+    .card{
+      background:#fff; border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
+      border-left:8px solid var(--neutral); display:flex; flex-direction:column;
+      min-height: 300px;
+    }
+    .pill{
+      display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold;
+      border:1px solid var(--neutral); width: fit-content;
+    }
+    .risk-red{ border-left-color:var(--red); }
+    .risk-yellow{ border-left-color:var(--yellow); }
+    .risk-green{ border-left-color:var(--green); }
+    .risk-notset{ border-left-color:var(--purple); }
+
+    .pill.risk-red{ background:rgba(255,86,48,.12); color:#BF2600; border-color:rgba(255,86,48,.35); }
+    .pill.risk-yellow{ background:rgba(255,171,0,.14); color:#7A5D00; border-color:rgba(255,171,0,.40); }
+    .pill.risk-green{ background:rgba(54,179,126,.12); color:#006644; border-color:rgba(54,179,126,.35); }
+    .pill.risk-notset{ background:rgba(101,84,192,.10); color:#403294; border-color:rgba(101,84,192,.35); }
+
+    .card-title{ font-size:22px; margin:10px 0 6px 0; font-family: Georgia, "Times New Roman", Times, serif; }
+    .meta{ font-size:13px; color:var(--muted); margin-bottom:10px; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .sep{ margin:0 6px; }
+
+    .row{ font-size:14px; margin-top:8px; }
+    .label{ font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin-top:12px; margin-bottom:4px; border-top:1px dashed #333333; padding-top:10px; }
+    .value{ font-size:14px; line-height:1.35; white-space:pre-wrap; }
+
+    .footer{ margin-top:auto; padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    a.link{ color:var(--link); font-weight:bold; text-decoration:none; display:inline-block; border:1px solid #c1c7d0; padding:10px 10px; border-radius:4px; background:#fff; }
+    a.link:hover{ text-decoration:none; background: rgba(9,30,66,0.04); }
+    .muted{ color:var(--muted); }
+    .priority{ font-size:12px; color:var(--muted); }
+  
+    /* Risk Details toggle */
+    .toggle-btn{
+      width: 100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:0;
+      margin:0;
+      background:none;
+      border:none;
+      cursor:pointer;
+      font: inherit;
+      color: inherit;
+      text-align:left;
+    }
+    .toggle-btn .toggle-text{
+      font-size:12px;
+      font-weight:bold;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      color:var(--muted);
+    }
+    .chevron{
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid #333333;
+      border-bottom: 2px solid #333333;
+      transform: rotate(45deg);
+      transition: transform 200ms ease;
+      margin-top: 2px;
+      flex: 0 0 auto;
+    }
+    .risk-details-wrap{
+      overflow:hidden;
+      max-height:0;
+      opacity:0;
+      transition: max-height 260ms ease, opacity 220ms ease;
+    }
+    .risk-open .risk-details-wrap{
+      max-height: 600px;
+      opacity:1;
+    }
+    .risk-open .chevron{
+      transform: rotate(-135deg);
+    }
+    .risk-details-value{
+      padding-top: 6px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <h1 class="title">Technical Program Summary</h1>
+        <p class="subtitle" id="subtitle">Initiatives • Sorted by Risk then Priority (Critical → High → Normal → Low)</p>
+      </div>
+      <div class="controls">
+        <label class="control">
+          XML URL
+          <input id="xmlUrl" />
+        </label>
+        <label class="control">
+          Jira Base URL
+          <input id="jiraBaseUrl" />
+        </label>
+        <button class="btn" id="refreshBtn">Refresh</button>
+      </div>
+    </div>
+
+    <div id="error" class="error" style="display:none;"></div>
+
+    <div class="kpis" id="kpis"></div>
+    <div class="grid" id="cards"></div>
+  </div>
+
+<script>
+/** -------- CONFIG -------- */
+const DEFAULT_XML_URL = "./roadmap.xml";
+const DEFAULT_JIRA_BASE_URL = "https://legacycom.atlassian.net/browse/";
+const AUTO_REFRESH_MS = 0;
+
+const FIELD = {
+  issueType: "Initiative",
+  phase: "Implementation Phase",
+  statusSummary: "Initiative Status Summary",
+  riskStatus: "Risk Status",
+  riskDetails: "Risk Details",
+};
+
+let state = {
+  allInitiatives: [],
+  kpis: { total: 0, Red: 0, Yellow: 0, Green: 0, "Not Set": 0 },
+  riskFilter: null, // "Red" | "Yellow" | "Green" | "Not Set" | null
+};
+
+function safeStr(v){ return (v === null || v === undefined) ? "" : String(v); }
+
+function normalizeRisk(v){
+  const s = safeStr(v).trim().toLowerCase();
+  if (s.includes("red")) return "Red";
+  if (s.includes("yellow") || s.includes("amber")) return "Yellow";
+  if (s.includes("green")) return "Green";
+  return "Not Set";
+}
+function riskRank(r){
+  return (r === "Red") ? 0 : (r === "Yellow") ? 1 : (r === "Green") ? 2 : 3;
+}
+function riskClass(r){
+  return (r === "Red") ? "risk-red" : (r === "Yellow") ? "risk-yellow" : (r === "Green") ? "risk-green" : "risk-notset";
+}
+
+// Priority sorting: Critical -> High -> Normal -> Low -> (other/none)
+function normalizePriority(v){
+  const s = safeStr(v).trim().toLowerCase();
+  if (!s) return "Not Set";
+  // Common Jira values: Highest/High/Medium/Low/Lowest, or Critical/High/Normal/Low
+  if (s.includes("critical")) return "Critical";
+  if (s === "highest" || s.includes("highest")) return "Critical"; // treat Highest as Critical per exec view
+  if (s.includes("high")) return "High";
+  if (s.includes("medium")) return "Normal";
+  if (s.includes("normal")) return "Normal";
+  if (s.includes("low")) return "Low"; // matches low/lowest
+  return safeStr(v).trim();
+}
+function priorityRank(pNorm){
+  const p = safeStr(pNorm).trim().toLowerCase();
+  if (p === "critical") return 0;
+  if (p === "high") return 1;
+  if (p === "normal") return 2;
+  if (p === "low") return 3;
+  // other priorities (or missing) go last
+  if (p === "not set") return 99;
+  return 98;
+}
+
+function parseDueDate(v){
+  const s = safeStr(v).trim();
+  if (!s) return null;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+function formatDue(d){
+  if (!d) return "Not Set";
+  return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+}
+function escapeHtml(s){
+  return safeStr(s)
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+function decodeHtmlEntities(str){
+  const txt = document.createElement("textarea");
+  txt.innerHTML = safeStr(str);
+  return txt.value;
+}
+function stripHtmlToText(maybeHtml){
+  const decoded = decodeHtmlEntities(maybeHtml);
+  const tmp = document.createElement("div");
+  tmp.innerHTML = decoded;
+  return tmp.textContent || tmp.innerText || decoded;
+}
+
+function getText(el, selector){
+  const node = el.querySelector(selector);
+  return node ? node.textContent : "";
+}
+
+function getCustomFieldValue(itemEl, fieldName){
+  const customfields = itemEl.querySelectorAll("customfields customfield");
+  for (const cf of customfields){
+    const name = getText(cf, "customfieldname").trim();
+    if (name === fieldName){
+      const v = cf.querySelector("customfieldvalues customfieldvalue");
+      return v ? v.textContent : "";
+    }
+  }
+  return "";
+}
+
+function parseJiraRss(xmlText){
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(xmlText, "text/xml");
+  const perr = xml.querySelector("parsererror");
+  if (perr){
+    throw new Error("XML parse error. Ensure the file is valid XML.");
+  }
+
+  const items = Array.from(xml.querySelectorAll("channel > item"));
+  const initiatives = [];
+
+  for (const it of items){
+    const type = getText(it, "type").trim();
+    if (type !== FIELD.issueType) continue;
+
+    const issueKey = getText(it, "key").trim();
+    const summary = getText(it, "summary").trim();
+    const owner = getText(it, "assignee").trim() || "Unassigned";
+
+    const dueRaw = getText(it, "due").trim();
+    const due = parseDueDate(dueRaw);
+
+    // Jira RSS typically includes <priority> in item
+    const priorityRaw = getText(it, "priority").trim();
+    const priorityNorm = normalizePriority(priorityRaw);
+    const pRank = priorityRank(priorityNorm);
+
+    const phaseRaw = getCustomFieldValue(it, FIELD.phase);
+    const statusSummaryRaw = getCustomFieldValue(it, FIELD.statusSummary);
+    const riskStatusRaw = getCustomFieldValue(it, FIELD.riskStatus);
+    const riskDetailsRaw = getCustomFieldValue(it, FIELD.riskDetails);
+
+    const riskNorm = normalizeRisk(riskStatusRaw);
+
+    initiatives.push({
+      issueKey,
+      summary,
+      owner,
+      due,
+      dueLabel: formatDue(due),
+      priority: priorityNorm || "Not Set",
+      priorityRank: pRank,
+      phase: safeStr(phaseRaw).trim() || "Not Set",
+      statusSummary: stripHtmlToText(statusSummaryRaw).trim() || "No summary provided",
+      riskDetails: stripHtmlToText(riskDetailsRaw).trim() || "No risk details provided",
+      riskNorm,
+      riskRank: riskRank(riskNorm),
+      link: getText(it, "link").trim()
+    });
+  }
+
+  // Sort: Risk (Red/Yellow/Green/Not Set) then Priority (Critical/High/Normal/Low) then due date then summary
+  initiatives.sort((a,b) => {
+    if (a.riskRank !== b.riskRank) return a.riskRank - b.riskRank;
+    if (a.priorityRank !== b.priorityRank) return a.priorityRank - b.priorityRank;
+    const at = a.due ? a.due.getTime() : Number.POSITIVE_INFINITY;
+    const bt = b.due ? b.due.getTime() : Number.POSITIVE_INFINITY;
+    if (at !== bt) return at - bt;
+    return (a.summary || "").localeCompare(b.summary || "");
+  });
+
+  const kpis = { total: initiatives.length, Red:0, Yellow:0, Green:0, "Not Set":0 };
+  for (const i of initiatives) kpis[i.riskNorm]++;
+
+  return { initiatives, kpis };
+}
+
+function applyFilter(){
+  if (!state.riskFilter) return state.allInitiatives;
+  return state.allInitiatives.filter(i => i.riskNorm === state.riskFilter);
+}
+
+function renderKPIs(){
+  const k = state.kpis;
+  const active = state.riskFilter;
+  const el = document.getElementById("kpis");
+
+  const pressed = (risk) => (active === risk ? "true" : "false");
+  const chipText = (risk) => (active === risk ? "Showing only" : "Click to filter");
+
+  el.innerHTML = `
+    <div class="kpi" role="button" tabindex="0" data-risk="__all__" aria-pressed="${active ? "false" : "true"}">
+      <div class="kpi-label">Total Initiatives <span class="kpi-chip">${active ? "Click to clear" : "Showing all"}</span></div>
+      <div class="kpi-value">${k.total}</div>
+    </div>
+
+    <div class="kpi kpi-red" role="button" tabindex="0" data-risk="Red" aria-pressed="${pressed("Red")}">
+      <div class="kpi-label">Red <span class="kpi-chip">${chipText("Red")}</span></div>
+      <div class="kpi-value">${k.Red}</div>
+    </div>
+
+    <div class="kpi kpi-yellow" role="button" tabindex="0" data-risk="Yellow" aria-pressed="${pressed("Yellow")}">
+      <div class="kpi-label">Yellow <span class="kpi-chip">${chipText("Yellow")}</span></div>
+      <div class="kpi-value">${k.Yellow}</div>
+    </div>
+
+    <div class="kpi kpi-green" role="button" tabindex="0" data-risk="Green" aria-pressed="${pressed("Green")}">
+      <div class="kpi-label">Green <span class="kpi-chip">${chipText("Green")}</span></div>
+      <div class="kpi-value">${k.Green}</div>
+    </div>
+
+    <div class="kpi kpi-notset" role="button" tabindex="0" data-risk="Not Set" aria-pressed="${pressed("Not Set")}">
+      <div class="kpi-label">Not Set <span class="kpi-chip">${chipText("Not Set")}</span></div>
+      <div class="kpi-value">${k["Not Set"]}</div>
+    </div>
+  `;
+
+  const cards = el.querySelectorAll(".kpi");
+  for (const card of cards){
+    const onActivate = () => {
+      const risk = card.getAttribute("data-risk");
+      if (risk === "__all__"){
+        state.riskFilter = null;
+      } else {
+        state.riskFilter = (state.riskFilter === risk) ? null : risk;
+      }
+      renderKPIs();
+      renderCards(applyFilter());
+    };
+
+    card.addEventListener("click", onActivate);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onActivate();
+      }
+    });
+  }
+}
+
+function renderCards(items){
+  const jiraBaseUrl = document.getElementById("jiraBaseUrl").value.trim();
+  const el = document.getElementById("cards");
+  if (!items.length){
+    const msg = state.riskFilter ? `No Initiatives found for ${state.riskFilter}.` : "No Initiatives found in the XML.";
+    el.innerHTML = `<div class="muted">${escapeHtml(msg)}</div>`;
+    return;
+  }
+
+  el.innerHTML = items.map(i => {
+    const rClass = riskClass(i.riskNorm);
+    const jiraLink = i.issueKey ? `${jiraBaseUrl}${encodeURIComponent(i.issueKey)}` : (i.link || "");
+
+    return `
+      <div class="card ${rClass}">
+        <div class="pill ${rClass}">${escapeHtml(i.riskNorm)}</div>
+        <div class="card-title">${escapeHtml(i.summary || "(No summary)")}</div>
+
+        <div class="meta">
+          <span class="mono">${escapeHtml(i.issueKey || "No key")}</span>
+          <span class="sep">•</span>
+          <span><b>Phase:</b> ${escapeHtml(i.phase)}</span>
+        </div>
+
+        <div class="row"><b>Owner:</b> ${escapeHtml(i.owner)}</div>
+        <div class="row"><b>Target:</b> ${escapeHtml(i.dueLabel)}</div>
+
+        <div class="label">Status Summary</div>
+        <div class="value">${escapeHtml(i.statusSummary)}</div>
+
+        <div class="label">
+          <button class="toggle-btn js-risk-toggle" type="button" aria-expanded="false">
+            <span class="toggle-text">Risk Details</span>
+            <span class="chevron" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="risk-details-wrap">
+          <div class="value risk-details-value">${escapeHtml(i.riskDetails)}</div>
+        </div>
+
+        <div class="footer">
+          ${jiraLink ? `<a class="link" href="${jiraLink}" target="_blank" rel="noreferrer">View in Jira →</a>` : `<span class="muted">No Jira link</span>`}
+          <span class="priority"><b>Priority:</b> ${escapeHtml(i.priority || "Not Set")}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function setError(msg){
+  const el = document.getElementById("error");
+  if (!msg){
+    el.style.display = "none";
+    el.textContent = "";
+    return;
+  }
+  el.style.display = "block";
+  el.textContent = msg;
+}
+
+async function loadAndRender(){
+  const xmlUrl = document.getElementById("xmlUrl").value.trim();
+
+  setError("");
+  try{
+    const bust = `cb=${Date.now()}`;
+    const url = xmlUrl.includes("?") ? `${xmlUrl}&${bust}` : `${xmlUrl}?${bust}`;
+
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`XML fetch failed: ${res.status} ${res.statusText}`);
+    const text = await res.text();
+
+    const parsed = parseJiraRss(text);
+
+    state.allInitiatives = parsed.initiatives;
+    state.kpis = parsed.kpis;
+    state.riskFilter = null;
+
+    renderKPIs();
+    renderCards(applyFilter());
+
+    document.getElementById("subtitle").textContent =
+      `Initiatives • Sorted by Risk then Priority (Critical → High → Normal → Low) • Updated ${new Date().toLocaleString()}`;
+
+  } catch (e){
+    setError(e && e.message ? e.message : "Failed to load/parse XML.");
+    state.allInitiatives = [];
+    state.kpis = { total: 0, Red: 0, Yellow: 0, Green: 0, "Not Set": 0 };
+    state.riskFilter = null;
+    document.getElementById("kpis").innerHTML = "";
+    document.getElementById("cards").innerHTML = "";
+  }
+}
+
+function init(){
+  // Allow overriding XML URL via query parameter: ?xmlurl=...
+  const params = new URLSearchParams(window.location.search);
+  const qpXml = params.get("xmlurl");
+  document.getElementById("xmlUrl").value = (qpXml && qpXml.trim()) ? qpXml.trim() : DEFAULT_XML_URL;
+  document.getElementById("jiraBaseUrl").value = DEFAULT_JIRA_BASE_URL;
+  document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
+
+  // Risk Details toggle (event delegation)
+  const cardsEl = document.getElementById("cards");
+  cardsEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".js-risk-toggle");
+    if (!btn) return;
+    const card = btn.closest(".card");
+    if (!card) return;
+    const isOpen = card.classList.toggle("risk-open");
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  loadAndRender();
+  if (AUTO_REFRESH_MS > 0) setInterval(loadAndRender, AUTO_REFRESH_MS);
+}
+init();
+</script>
+</body>
+</html>
