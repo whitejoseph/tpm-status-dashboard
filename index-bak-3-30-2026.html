@@ -22,11 +22,11 @@
     .controls{ display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
     .control{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
     .control input{
-      width:320px; max-width:80vw; padding:8px 10px; border-radius:10px;
+      width:320px; max-width:80vw; padding:8px 10px; border-radius:4px;
       border:1px solid var(--neutral); background:#fff; color:var(--text);
     }
     .btn{
-      padding:9px 12px; border-radius:10px; border:1px solid var(--neutral);
+      padding:9px 12px; border-radius:4px; border:1px solid var(--neutral);
       background:#fff; cursor:pointer;
     }
 
@@ -106,7 +106,7 @@
     .value{ font-size:14px; line-height:1.35; white-space:pre-wrap; }
 
     .footer{ margin-top:auto; padding-top:12px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
-    a.link{ color:var(--link); font-weight:bold; text-decoration:none; display:inline-block; border:1px solid #c1c7d0; padding:6px 10px; border-radius:10px; background:#fff; }
+    a.link{ color:var(--link); font-weight:bold; text-decoration:none; display:inline-block; border:1px solid #c1c7d0; padding:10px 10px; border-radius:4px; background:#fff; }
     a.link:hover{ text-decoration:none; background: rgba(9,30,66,0.04); }
     .muted{ color:var(--muted); }
     .priority{ font-size:12px; color:var(--muted); }
@@ -172,7 +172,7 @@
       </div>
       <div class="controls">
         <label class="control">
-          Data URL
+          XML URL
           <input id="xmlUrl" />
         </label>
         <label class="control">
@@ -192,7 +192,6 @@
 <script>
 /** -------- CONFIG -------- */
 const DEFAULT_XML_URL = "./roadmap.xml";
-const DEFAULT_JSON_URL = "./roadmap.json";
 const DEFAULT_JIRA_BASE_URL = "https://legacycom.atlassian.net/browse/";
 const AUTO_REFRESH_MS = 0;
 
@@ -291,97 +290,6 @@ function getCustomFieldValue(itemEl, fieldName){
     }
   }
   return "";
-}
-
-function sourceTypeFromUrl(url){
-  const u = safeStr(url).trim().toLowerCase();
-  if (u.endsWith(".json") || u.includes(".json?")) return "json";
-  return "xml";
-}
-
-function adfToText(node){
-  if (!node) return "";
-  if (typeof node === "string") return node;
-  if (Array.isArray(node)) return node.map(adfToText).join(" ").replace(/\s+/g, " ").trim();
-  let parts = [];
-  if (node.text) parts.push(node.text);
-  if (node.content) {
-    const childText = adfToText(node.content);
-    if (childText) parts.push(childText);
-  }
-  // add soft separators for block-ish nodes
-  if (["paragraph","tableRow","bulletList","orderedList","listItem"].includes(node.type)) parts.push("\n");
-  return parts.join(" ").replace(/[ \t]+/g, " ").replace(/\n\s+/g, "\n").trim();
-}
-
-function getJsonFieldText(issue, fieldKey){
-  const rendered = issue.renderedFields || {};
-  const fields = issue.fields || {};
-  const r = rendered[fieldKey];
-  if (typeof r === "string" && r.trim()) return stripHtmlToText(r).trim();
-  const f = fields[fieldKey];
-  if (typeof f === "string") return f.trim();
-  if (f && typeof f === "object" && f.type === "doc") return adfToText(f).trim();
-  return "";
-}
-
-function parseJiraJson(jsonText){
-  let payload;
-  try {
-    payload = JSON.parse(jsonText);
-  } catch (e) {
-    throw new Error("JSON parse error. Ensure the file is valid JSON.");
-  }
-
-  const items = Array.isArray(payload) ? payload : (Array.isArray(payload.results) ? payload.results : []);
-  const initiatives = [];
-
-  for (const it of items){
-    const fields = it.fields || {};
-    const key = safeStr(it.key).trim();
-    // Current JSON export does not include issue type directly in requested fields, so initiatives are identified by INIT-* keys.
-    if (!key.startsWith("INIT-")) continue;
-
-    const summary = safeStr(fields.summary).trim();
-    const owner = fields.assignee && fields.assignee.displayName ? safeStr(fields.assignee.displayName).trim() : "Unassigned";
-    const due = parseDueDate(fields.duedate);
-    const priorityNorm = normalizePriority(fields.priority && fields.priority.name ? fields.priority.name : "");
-    const phase = fields.customfield_17094 && fields.customfield_17094.value ? safeStr(fields.customfield_17094.value).trim() : "Not Set";
-    const riskRaw = fields.customfield_17095 && fields.customfield_17095.value ? safeStr(fields.customfield_17095.value).trim() : "";
-    const statusSummary = getJsonFieldText(it, "customfield_17093") || "No summary provided";
-    const riskDetails = getJsonFieldText(it, "customfield_17096") || "No risk details provided";
-    const riskNorm = normalizeRisk(riskRaw);
-
-    initiatives.push({
-      issueKey: key,
-      summary,
-      owner,
-      due,
-      dueLabel: formatDue(due),
-      priority: priorityNorm || "Not Set",
-      priorityRank: priorityRank(priorityNorm || "Not Set"),
-      phase,
-      statusSummary,
-      riskDetails,
-      riskNorm,
-      riskRank: riskRank(riskNorm),
-      link: ""
-    });
-  }
-
-  initiatives.sort((a,b) => {
-    if (a.riskRank !== b.riskRank) return a.riskRank - b.riskRank;
-    if (a.priorityRank !== b.priorityRank) return a.priorityRank - b.priorityRank;
-    const at = a.due ? a.due.getTime() : Number.POSITIVE_INFINITY;
-    const bt = b.due ? b.due.getTime() : Number.POSITIVE_INFINITY;
-    if (at !== bt) return at - bt;
-    return (a.summary || "").localeCompare(b.summary || "");
-  });
-
-  const kpis = { total: initiatives.length, Red:0, Yellow:0, Green:0, "Not Set":0 };
-  for (const i of initiatives) kpis[i.riskNorm]++;
-
-  return { initiatives, kpis };
 }
 
 function parseJiraRss(xmlText){
@@ -575,19 +483,18 @@ function setError(msg){
 }
 
 async function loadAndRender(){
-  const sourceUrl = document.getElementById("xmlUrl").value.trim();
+  const xmlUrl = document.getElementById("xmlUrl").value.trim();
 
   setError("");
   try{
     const bust = `cb=${Date.now()}`;
-    const url = sourceUrl.includes("?") ? `${sourceUrl}&${bust}` : `${sourceUrl}?${bust}`;
+    const url = xmlUrl.includes("?") ? `${xmlUrl}&${bust}` : `${xmlUrl}?${bust}`;
 
     const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Data fetch failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) throw new Error(`XML fetch failed: ${res.status} ${res.statusText}`);
     const text = await res.text();
 
-    const sourceType = sourceTypeFromUrl(sourceUrl);
-    const parsed = sourceType === "json" ? parseJiraJson(text) : parseJiraRss(text);
+    const parsed = parseJiraRss(text);
 
     state.allInitiatives = parsed.initiatives;
     state.kpis = parsed.kpis;
@@ -597,10 +504,10 @@ async function loadAndRender(){
     renderCards(applyFilter());
 
     document.getElementById("subtitle").textContent =
-      `Initiatives • Sorted by Risk then Priority (Critical → High → Normal → Low) • Source: ${sourceType.toUpperCase()} • Updated ${new Date().toLocaleString()}`;
+      `Initiatives • Sorted by Risk then Priority (Critical → High → Normal → Low) • Updated ${new Date().toLocaleString()}`;
 
   } catch (e){
-    setError(e && e.message ? e.message : "Failed to load/parse data file.");
+    setError(e && e.message ? e.message : "Failed to load/parse XML.");
     state.allInitiatives = [];
     state.kpis = { total: 0, Red: 0, Yellow: 0, Green: 0, "Not Set": 0 };
     state.riskFilter = null;
@@ -610,21 +517,10 @@ async function loadAndRender(){
 }
 
 function init(){
-  // Supports:
-  // ?xmlurl=path/to/file.xml
-  // ?json=path/to/file.json
-  // ?jsonurl=path/to/file.json
+  // Allow overriding XML URL via query parameter: ?xmlurl=...
   const params = new URLSearchParams(window.location.search);
-  const qpJson = params.get("json");
-  const qpJsonUrl = params.get("jsonurl");
   const qpXml = params.get("xmlurl");
-  const chosenUrl =
-    (qpJson && qpJson.trim()) ? qpJson.trim() :
-    (qpJsonUrl && qpJsonUrl.trim()) ? qpJsonUrl.trim() :
-    (qpXml && qpXml.trim()) ? qpXml.trim() :
-    DEFAULT_XML_URL;
-
-  document.getElementById("xmlUrl").value = chosenUrl;
+  document.getElementById("xmlUrl").value = (qpXml && qpXml.trim()) ? qpXml.trim() : DEFAULT_XML_URL;
   document.getElementById("jiraBaseUrl").value = DEFAULT_JIRA_BASE_URL;
   document.getElementById("refreshBtn").addEventListener("click", loadAndRender);
 
@@ -642,7 +538,6 @@ function init(){
   loadAndRender();
   if (AUTO_REFRESH_MS > 0) setInterval(loadAndRender, AUTO_REFRESH_MS);
 }
-
 init();
 </script>
 </body>
