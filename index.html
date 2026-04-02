@@ -191,8 +191,18 @@
 
 <script>
 /** -------- CONFIG -------- */
+
+const today = new Date();
+
+const month = today.getMonth() + 1; // Months are 0-based
+const day = today.getDate();
+const year = today.getFullYear();
+
+const formattedDate = `${month}-${day}-${year}`;
+
+
 const DEFAULT_XML_URL = "./roadmap.xml";
-const DEFAULT_JSON_URL = "./roadmap.json";
+const DEFAULT_JSON_URL = "json/jira-"+formattedDate+".json";
 const DEFAULT_JIRA_BASE_URL = "https://legacycom.atlassian.net/browse/";
 const AUTO_REFRESH_MS = 0;
 
@@ -622,7 +632,7 @@ function init(){
     (qpJson && qpJson.trim()) ? qpJson.trim() :
     (qpJsonUrl && qpJsonUrl.trim()) ? qpJsonUrl.trim() :
     (qpXml && qpXml.trim()) ? qpXml.trim() :
-    DEFAULT_XML_URL;
+    DEFAULT_JSON_URL;
 
   document.getElementById("xmlUrl").value = chosenUrl;
   document.getElementById("jiraBaseUrl").value = DEFAULT_JIRA_BASE_URL;
