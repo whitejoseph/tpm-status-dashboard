@@ -108,24 +108,20 @@
     .risk-yellow{ border-left-color:var(--yellow); }
 
     .risk-yellow, .risk-red {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: #3498db;
       /* Apply the animation */
       animation: pulse-shadow 2s infinite;
     }
 
       @keyframes pulse-shadow {
         0% {
-          box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+          box-shadow: 0 0 0 0 rgba(255, 86, 48, 0.35);
         }
         70% {
           /* Spread the shadow outward and fade */
-          box-shadow: 0 0 0 20px rgba(52, 152, 219, 0);
+          box-shadow: 0 0 0 5px rgba(255, 86, 48, 0);
         }
         100% {
-          box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+          box-shadow: 0 0 0 0 rgba(255, 86, 48, 0);
         }
       }
 
