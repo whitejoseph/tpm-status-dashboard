@@ -82,12 +82,55 @@
       border-left:8px solid var(--neutral); display:flex; flex-direction:column;
       min-height: 300px;
     }
+
+    .card {
+      opacity: 0; /* Starts hidden */
+      animation: reveal 1s ease-out 0.5s forwards; /* Duration | Timing | Delay | Fill-mode */
+    }
+
+      @keyframes reveal {
+        from {
+          opacity: 0;
+          transform: translateY(20px); /* Optional: slight slide-up effect */
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+
     .pill{
       display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:bold;
       border:1px solid var(--neutral); width: fit-content;
     }
     .risk-red{ border-left-color:var(--red); }
     .risk-yellow{ border-left-color:var(--yellow); }
+
+    .risk-yellow, .risk-red {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #3498db;
+      /* Apply the animation */
+      animation: pulse-shadow 2s infinite;
+    }
+
+      @keyframes pulse-shadow {
+        0% {
+          box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+        }
+        70% {
+          /* Spread the shadow outward and fade */
+          box-shadow: 0 0 0 20px rgba(52, 152, 219, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+        }
+      }
+
+
+
     .risk-green{ border-left-color:var(--green); }
     .risk-notset{ border-left-color:var(--purple); }
 
